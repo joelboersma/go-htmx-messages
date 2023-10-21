@@ -10,7 +10,10 @@ import (
 
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello World!\n")
+		io.WriteString(w, "Root!\n")
+	})
+	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+		io.WriteString(w, "Hello HTTP!\n")
 	})
 
 	fmt.Println("Running server on port 8080")
