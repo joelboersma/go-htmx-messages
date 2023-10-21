@@ -1,11 +1,9 @@
 package main
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 )
 
@@ -13,6 +11,7 @@ const keyServerAddr = "serverAddr"
 
 func main() {
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		hasFirst := r.URL.Query().Has("first")
 		first := r.URL.Query().Get("first")
@@ -41,18 +40,8 @@ func main() {
 		io.WriteString(w, fmt.Sprintf("Hello %s!\n", myName))
 	})
 
-	ctx := context.Background()
-	server := &http.Server{
-		Addr:    ":8080",
-		Handler: mux,
-		BaseContext: func(l net.Listener) context.Context {
-			ctx = context.WithValue(ctx, keyServerAddr, l.Addr().String())
-			return ctx
-		},
-	}
-
 	fmt.Println("Running server on port 8080")
-	err := server.ListenAndServe()
+	err := http.ListenAndServe(":8080", mux)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Println("Server closed")
 	} else if err != nil {
