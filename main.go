@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
+	"os"
 )
 
 const keyServerAddr = "serverAddr"
@@ -13,31 +13,13 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		hasFirst := r.URL.Query().Has("first")
-		first := r.URL.Query().Get("first")
-		hasSecond := r.URL.Query().Has("second")
-		second := r.URL.Query().Get("second")
-
-		body, err := io.ReadAll(r.Body)
+		htmlContent, err := os.ReadFile("index.html")
 		if err != nil {
-			fmt.Printf("could not read body: %s\n", err)
+			http.Error(w, "Unable to read HTML file", http.StatusInternalServerError)
+			return
 		}
-
-		res := fmt.Sprintf("first(%t)=%s, second(%t)=%s\nbody:\n%s\n",
-			hasFirst, first,
-			hasSecond, second,
-			body,
-		)
-
-		io.WriteString(w, res)
-	})
-
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		myName := r.PostFormValue("myName")
-		if myName == "" {
-			myName = "HTTP"
-		}
-		io.WriteString(w, fmt.Sprintf("Hello %s!\n", myName))
+		w.Header().Set("Content-Type", "text/html")
+		w.Write(htmlContent)
 	})
 
 	fmt.Println("Running server on port 8080")
