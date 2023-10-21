@@ -19,7 +19,16 @@ func main() {
 		hasSecond := r.URL.Query().Has("second")
 		second := r.URL.Query().Get("second")
 
-		res := fmt.Sprintf("first(%t)=%s, second(%t)=%s\n", hasFirst, first, hasSecond, second)
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("could not read body: %s\n", err)
+		}
+
+		res := fmt.Sprintf("first(%t)=%s, second(%t)=%s\nbody:\n%s\n",
+			hasFirst, first,
+			hasSecond, second,
+			body,
+		)
 
 		io.WriteString(w, res)
 	})
