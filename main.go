@@ -13,12 +13,15 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/" {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
 		htmlContent, err := os.ReadFile("index.html")
 		if err != nil {
 			http.Error(w, "Unable to read HTML file", http.StatusInternalServerError)
 			return
 		}
-		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("Content-Type", "text/html; charset=utf8")
 		w.Write(htmlContent)
 	})
 
