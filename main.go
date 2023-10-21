@@ -26,6 +26,9 @@ func main() {
 		w.Write(htmlContent)
 	})
 
+	staticFs := http.FileServer(http.Dir("static"))
+	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
+
 	fmt.Println("Running server on port 8080")
 	err := http.ListenAndServe(":8080", mux)
 	if errors.Is(err, http.ErrServerClosed) {
