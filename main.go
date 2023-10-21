@@ -32,8 +32,13 @@ func main() {
 
 		io.WriteString(w, res)
 	})
+
 	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
-		io.WriteString(w, "Hello HTTP!\n")
+		myName := r.PostFormValue("myName")
+		if myName == "" {
+			myName = "HTTP"
+		}
+		io.WriteString(w, fmt.Sprintf("Hello %s!\n", myName))
 	})
 
 	ctx := context.Background()
