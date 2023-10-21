@@ -9,15 +9,16 @@ import (
 )
 
 func main() {
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Root!\n")
 	})
-	http.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "Hello HTTP!\n")
 	})
 
 	fmt.Println("Running server on port 8080")
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":8080", mux)
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Println("Server closed")
 	} else if err != nil {
