@@ -15,6 +15,7 @@ func main() {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
 		}
 		htmlContent, err := os.ReadFile("index.html")
 		if err != nil {
