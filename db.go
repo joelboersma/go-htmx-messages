@@ -51,7 +51,7 @@ func getMessages(db *sql.DB, userId1 int, userId2 int) ([]Message, error) {
 		SELECT * FROM message
 		WHERE sender_id = ? AND recipient_id = ?
 		OR sender_id = ? AND recipient_id = ?
-		ORDER BY sent_at DESC
+		ORDER BY sent_at
 	`, userId1, userId2, userId2, userId1)
 	if err != nil {
 		return nil, err
