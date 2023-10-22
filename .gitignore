@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+app
 
 # Test binary, built with `go test -c`
 *.test
@@ -22,3 +23,6 @@ go.work
 
 # SQLite DB files
 *.db
+
+# Editor-specific files
+.vscode
