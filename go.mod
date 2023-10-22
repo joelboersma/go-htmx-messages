@@ -2,4 +2,4 @@ module github.com/joelboersma/go-htmx-messages
 
 go 1.21.3
 
-require github.com/mattn/go-sqlite3 v1.14.17 // indirect
+require github.com/mattn/go-sqlite3 v1.14.17
