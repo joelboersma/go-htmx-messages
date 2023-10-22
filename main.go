@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"os"
 
@@ -45,8 +46,6 @@ func main() {
 			http.Error(w, fmt.Sprintf("Couldn't get recipient: %s", err), http.StatusInternalServerError)
 			return
 		}
-		fmt.Println(currentUser)
-		fmt.Println(otherUser)
 
 		messages, err := getMessages(db, currentUser.id, otherUser.id)
 		if err != nil {
@@ -54,15 +53,42 @@ func main() {
 			return
 		}
 
-		fmt.Println(messages)
+		displayMessages := []struct {
+			SenderName string
+			Content    string
+		}{}
+		for _, message := range messages {
+			name := "Unknown"
+			if message.sender_id == currentUser.id {
+				name = currentUser.name
+			} else if message.sender_id == otherUser.id {
+				name = otherUser.name
+			}
 
-		htmlContent, err := os.ReadFile("templates/messages.html")
+			displayMessage := struct {
+				SenderName string
+				Content    string
+			}{
+				name,
+				message.content,
+			}
+
+			displayMessages = append(displayMessages, displayMessage)
+		}
+
+		tmpl, err := template.ParseFiles("templates/messages.html")
 		if err != nil {
-			http.Error(w, "Unable to read HTML file", http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("Unable to parse template: %s", err), http.StatusInternalServerError)
 			return
 		}
+
+		err = tmpl.Execute(w, displayMessages)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Unable to execute template: %s", err), http.StatusInternalServerError)
+			return
+		}
+
 		w.Header().Set("Content-Type", "text/html; charset=utf8")
-		w.Write(htmlContent)
 	})
 
 	staticFs := http.FileServer(http.Dir("static"))

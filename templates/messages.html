@@ -1,1 +1,5 @@
-<div>Messages go here</div>
+<div>
+    {{ range . }}
+        <p><strong>{{ .SenderName }}</strong>: {{ .Content }}</p>
+    {{ end }}
+</div>
