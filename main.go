@@ -35,13 +35,22 @@ func main() {
 	})
 
 	mux.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
-		// TEMP: for testing
-		userId1 := 1
-		userId2 := 2
-
-		messages, err := getMessages(db, userId1, userId2)
+		currentUser, err := getUser(db, 1)
 		if err != nil {
-			http.Error(w, fmt.Sprintf("Unable to read fetch messages: %s", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("Couldn't get sender: %s", err), http.StatusInternalServerError)
+			return
+		}
+		otherUser, err := getUser(db, 2)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Couldn't get recipient: %s", err), http.StatusInternalServerError)
+			return
+		}
+		fmt.Println(currentUser)
+		fmt.Println(otherUser)
+
+		messages, err := getMessages(db, currentUser.id, otherUser.id)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Unable to get messages: %s", err), http.StatusInternalServerError)
 			return
 		}
 

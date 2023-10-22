@@ -22,6 +22,30 @@ type Message struct {
 	sent_at      string
 }
 
+func getUser(db *sql.DB, userId int) (User, error) {
+	row := db.QueryRow(
+		"SELECT * FROM user WHERE id = ?",
+		userId,
+	)
+	if row.Err() != nil {
+		return User{}, row.Err()
+	}
+
+	user := User{}
+	err := row.Scan(
+		&user.id,
+		&user.username,
+		&user.name,
+		&user.created_at,
+		&user.password_hash,
+	)
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}
+
 func getMessages(db *sql.DB, userId1 int, userId2 int) ([]Message, error) {
 	rows, err := db.Query(`
 		SELECT * FROM message
