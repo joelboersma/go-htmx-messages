@@ -17,7 +17,17 @@ func main() {
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
-		htmlContent, err := os.ReadFile("index.html")
+		htmlContent, err := os.ReadFile("templates/index.html")
+		if err != nil {
+			http.Error(w, "Unable to read HTML file", http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf8")
+		w.Write(htmlContent)
+	})
+
+	mux.HandleFunc("/messages", func(w http.ResponseWriter, r *http.Request) {
+		htmlContent, err := os.ReadFile("templates/messages.html")
 		if err != nil {
 			http.Error(w, "Unable to read HTML file", http.StatusInternalServerError)
 			return
