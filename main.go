@@ -91,6 +91,22 @@ func main() {
 		w.Header().Set("Content-Type", "text/html; charset=utf8")
 	})
 
+	mux.HandleFunc("/conversations", func(w http.ResponseWriter, r *http.Request) {
+		currentUser, err := getUser(db, 1)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Couldn't get current user: %s", err), http.StatusInternalServerError)
+			return
+		}
+		conversationSummaries, err := currentUser.getConversationList(db)
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Error getting conversaions: %s", err), http.StatusInternalServerError)
+			return
+		}
+
+		// w.Write([]byte(strconv.Itoa(len(conversationSummaries))))
+		w.Write([]byte(fmt.Sprintf("%v", conversationSummaries)))
+	})
+
 	staticFs := http.FileServer(http.Dir("static"))
 	mux.Handle("/static/", http.StripPrefix("/static/", staticFs))
 

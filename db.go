@@ -14,12 +14,74 @@ type User struct {
 	password_hash string
 }
 
+func (u *User) getConversationList(db *sql.DB) ([]ConversationSummary, error) {
+	query := `
+		SELECT
+			CASE
+				WHEN message.sender_id = ? THEN message.recipient_id
+				WHEN message.recipient_id = ? THEN message.sender_id
+			END AS other_user_id,
+			user.name AS other_user_name,
+			MAX(message.sent_at) AS latest_interaction_time,
+			message.content,
+			CASE 
+				WHEN message.recipient_id = 1 THEN TRUE
+				ELSE FALSE
+			END AS message_from_other_user
+		FROM message
+		JOIN user ON other_user_id = user.id
+		WHERE message.sender_id = ? OR message.recipient_id = ?
+		GROUP BY other_user_id
+		ORDER BY latest_interaction_time DESC
+	`
+	rows, err := db.Query(query, u.id, u.id, u.id, u.id)
+	if err != nil {
+		return []ConversationSummary{}, err
+	}
+	defer rows.Close()
+
+	conversationSummaries := []ConversationSummary{}
+	for rows.Next() {
+		conversationSummary := ConversationSummary{
+			// Attrbitues from `u`
+			u.id, u.name,
+			// Other user and message info to be filled in from row
+			0, "", "", "", false,
+		}
+		err = rows.Scan(
+			&conversationSummary.OtherUserId,
+			&conversationSummary.OtherUserName,
+			&conversationSummary.LastMessageTimestamp,
+			&conversationSummary.LastMessageContent,
+			&conversationSummary.LastMessageFromOtherUser,
+		)
+		if err != nil {
+			return []ConversationSummary{}, err
+		}
+		conversationSummaries = append(conversationSummaries, conversationSummary)
+	}
+	if err := rows.Err(); err != nil {
+		return []ConversationSummary{}, err
+	}
+	return conversationSummaries, nil
+}
+
 type Message struct {
 	id           int
 	sender_id    int
 	recipient_id int
 	content      string
 	sent_at      string
+}
+
+type ConversationSummary struct {
+	UserId                   int
+	UserName                 string
+	OtherUserId              int
+	OtherUserName            string
+	LastMessageTimestamp     string
+	LastMessageContent       string
+	LastMessageFromOtherUser bool
 }
 
 func getUser(db *sql.DB, userId int) (User, error) {

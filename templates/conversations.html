@@ -1,0 +1,19 @@
+<div class="conversations">
+    {{ if .Conversations }}
+    <ul>
+        {{ range . }}
+        <li>
+            <div class="profile-image {{ .ProfileImageColorClass }}">
+                {{ .OtherUserInitial }}
+            </div>
+            <div>
+                <h2>{{ .OtherUser.Name }}</h2>
+                <div>{{ .SummaryText }}</div>
+            </div>
+        </li>
+        {{ end }}
+    </ul>
+    {{ else }}
+    <p>Start chatting</p>
+    {{ end }}
+</div>
